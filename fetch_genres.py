@@ -25,11 +25,20 @@ def fetch_song_genres(sp, liked_songs):
                 print(f"Processed {index + 1} songs out of {len(liked_songs)}.")
 
             # Add a small delay to avoid hitting the rate limit
-            time.sleep(1)  # 1-second delay between requests
+            time.sleep(10)  # 1-second delay between requests
 
         except Exception as e:
             print(f"Error fetching genres for song {index + 1}: {e}")
-            continue
+            if "rate limit" in str(e).lower():
+                # Extract the retry-after time from the error message
+                retry_after = int(
+                    e.headers.get("Retry-After", 10)
+                )  # Default to 10 seconds
+                print(f"Rate limit exceeded. Retrying after {retry_after} seconds.")
+                time.sleep(retry_after)  # Wait before retrying
+                continue
+            else:
+                continue
 
     print(f"Found {len(unique_genres)} unique genres.")
     return list(unique_genres)  # Convert set to list for JSON serialization
