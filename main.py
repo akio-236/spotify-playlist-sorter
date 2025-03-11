@@ -1,6 +1,6 @@
 from spotify_auth import authenticate_spotify
 from fetch_songs import fetch_liked_songs, fetch_song_metadata
-from organize_playlists import organize_by_genre, create_playlists
+from organize_songs import organize_by_genre, create_playlists
 from utils import setup_logging
 
 
