@@ -19,11 +19,17 @@ def create_playlists(sp, genre_playlists):
     user_id = sp.current_user()["id"]
 
     for genre, uris in genre_playlists.items():
+        # Create a new playlist
         playlist = sp.user_playlist_create(
             user=user_id, name=f"{genre} Playlist", public=True
         )
         playlist_id = playlist["id"]
-        sp.playlist_add_items(playlist_id, uris)
-        print(f"Created '{genre}' playlist with {len(uris)} songs.")
+
+        # Add songs in batches of 100
+        batch_size = 100
+        for i in range(0, len(uris), batch_size):
+            batch = uris[i : i + batch_size]
+            sp.playlist_add_items(playlist_id, batch)
+            print(f"Added {len(batch)} songs to '{genre}' playlist.")
 
     print("All playlists created successfully!")
