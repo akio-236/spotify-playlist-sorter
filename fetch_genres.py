@@ -1,20 +1,35 @@
 import json
+import time
 from spotify_auth import authenticate_spotify
 from fetch_songs import fetch_liked_songs
 
 
 def fetch_song_genres(sp, liked_songs):
     """
-    Fetch unique genres from liked songs.
+    Fetch unique genres from liked songs with rate limit handling.
     """
     unique_genres = set()  # To store unique genres
 
-    for item in liked_songs:
+    for index, item in enumerate(liked_songs):
         track = item["track"]
         artist_id = track["artists"][0]["id"]
-        artist_info = sp.artist(artist_id)
-        genres = artist_info["genres"]
-        unique_genres.update(genres)  # Add genres to the set
+
+        try:
+            # Fetch artist info (including genres)
+            artist_info = sp.artist(artist_id)
+            genres = artist_info["genres"]
+            unique_genres.update(genres)  # Add genres to the set
+
+            # Log progress every 100 songs
+            if (index + 1) % 100 == 0:
+                print(f"Processed {index + 1} songs out of {len(liked_songs)}.")
+
+            # Add a small delay to avoid hitting the rate limit
+            time.sleep(1)  # 1-second delay between requests
+
+        except Exception as e:
+            print(f"Error fetching genres for song {index + 1}: {e}")
+            continue
 
     print(f"Found {len(unique_genres)} unique genres.")
     return list(unique_genres)  # Convert set to list for JSON serialization
