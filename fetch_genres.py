@@ -25,7 +25,7 @@ def fetch_song_genres(sp, liked_songs):
                 print(f"Processed {index + 1} songs out of {len(liked_songs)}.")
 
             # Add a small delay to avoid hitting the rate limit
-            time.sleep(10)  # 1-second delay between requests
+            time.sleep(1)  # 1-second delay between requests
 
         except Exception as e:
             print(f"Error fetching genres for song {index + 1}: {e}")
