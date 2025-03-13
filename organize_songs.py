@@ -1,14 +1,14 @@
 import json
 from collections import defaultdict
-from fetch_songs import fetch_liked_songs, fetch_song_metadata
 from spotify_auth import authenticate_spotify
 
 
 def organize_by_broad_genre(song_data, broad_genres):
     """
     Organize songs into a dictionary of broad genres and their corresponding song URIs.
+    Ensures each song is added only once per playlist.
     """
-    genre_playlists = defaultdict(list)
+    genre_playlists = defaultdict(set)  # Use a set to avoid duplicates
 
     for song in song_data:
         for genre in song["genres"]:
@@ -21,8 +21,11 @@ def organize_by_broad_genre(song_data, broad_genres):
             if not broad_genre:
                 broad_genre = "Other"  # Default to "Other" if no match is found
 
-            # Add the song to the corresponding broad genre playlist
-            genre_playlists[broad_genre].append(song["uri"])
+            # Add the song URI to the corresponding broad genre playlist
+            genre_playlists[broad_genre].add(song["uri"])
+
+    # Convert sets back to lists for compatibility with the Spotify API
+    genre_playlists = {k: list(v) for k, v in genre_playlists.items()}
 
     print(f"Organized songs into {len(genre_playlists)} broad genres.")
     return genre_playlists
@@ -49,28 +52,3 @@ def create_playlists(sp, genre_playlists):
             print(f"Added {len(batch)} songs to '{broad_genre}' playlist.")
 
     print("All playlists created successfully!")
-
-
-def main():
-    # Authenticate with Spotify
-    sp = authenticate_spotify()
-
-    # Fetch liked songs
-    liked_songs = fetch_liked_songs(sp)
-
-    # Fetch song metadata
-    song_data = fetch_song_metadata(sp, liked_songs)
-
-    # Load broad genres from JSON file
-    with open("broad_genres.json", "r") as f:
-        broad_genres = json.load(f)
-
-    # Organize songs by broad genre
-    genre_playlists = organize_by_broad_genre(song_data, broad_genres)
-
-    # Create playlists
-    create_playlists(sp, genre_playlists)
-
-
-if __name__ == "__main__":
-    main()
