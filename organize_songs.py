@@ -1,5 +1,6 @@
 import json
 from collections import defaultdict
+from fetch_songs import fetch_liked_songs, fetch_song_metadata
 from spotify_auth import authenticate_spotify
 
 
