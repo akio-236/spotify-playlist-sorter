@@ -1,6 +1,6 @@
 import json
 
-# Genre mapping
+# Genre mapping (updated to include more genres)
 genre_mapping = {
     "Rock": [
         "alt rock",
@@ -70,10 +70,10 @@ genre_mapping = {
         "underground hip hop",
         "hardcore hip hop",
         "melodic rap",
+        "memphis rap",
         "rap metal",
         "southern hip hop",
         "drill",
-        "memphis rap",
     ],
     "Electronic": [
         "electronic",
@@ -151,6 +151,7 @@ genre_mapping = {
         "metalcore",
         "pirate metal",
         "folk metal",
+        "metal",
     ],
     "Country": [
         "country",
@@ -241,44 +242,29 @@ genre_mapping = {
     "Other": [],  # For genres that don't fit into the above categories
 }
 
+# Language mapping (to categorize songs by language)
+language_mapping = {
+    "Hindi": ["bollywood", "hindi pop", "hindi hip hop", "desi pop"],
+    "Tamil": ["kollywood", "tamil pop", "tamil hip hop"],
+    "Spanish": ["reggaeton", "latin", "spanish-language reggae"],
+    "Korean": ["k-pop", "k-rap", "k-ballad"],
+    "Japanese": ["j-pop", "j-rock", "j-rap"],
+    "Chinese": ["c-pop", "mandopop", "chinese r&b"],
+    "French": ["french jazz", "variété française"],
+    "Other Languages": [],  # For languages not explicitly mapped
+}
 
-def map_subgenres_to_broad_genres(unique_genres):
+
+def save_mappings_to_json():
     """
-    Map subgenres to broader genres.
+    Save genre and language mappings to JSON files.
     """
-    broad_genres = {}
-
-    for genre in unique_genres:
-        found = False
-        for broad_genre, subgenres in genre_mapping.items():
-            if genre.lower() in [sg.lower() for sg in subgenres]:
-                if broad_genre not in broad_genres:
-                    broad_genres[broad_genre] = []
-                broad_genres[broad_genre].append(genre)
-                found = True
-                break
-        if not found:
-            if "Other" not in broad_genres:
-                broad_genres["Other"] = []
-            broad_genres["Other"].append(genre)
-
-    return broad_genres
-
-
-def main():
-    # Load unique genres from JSON file
-    with open("unique_genres.json", "r") as f:
-        unique_genres = json.load(f)
-
-    # Map subgenres to broad genres
-    broad_genres = map_subgenres_to_broad_genres(unique_genres)
-
-    # Save mapped genres to a new JSON file
     with open("broad_genres.json", "w") as f:
-        json.dump(broad_genres, f, indent=4)
-
-    print("Broad genres saved to 'broad_genres.json'.")
+        json.dump(genre_mapping, f, indent=4)
+    with open("language_mapping.json", "w") as f:
+        json.dump(language_mapping, f, indent=4)
+    print("Genre and language mappings saved to JSON files.")
 
 
 if __name__ == "__main__":
-    main()
+    save_mappings_to_json()
