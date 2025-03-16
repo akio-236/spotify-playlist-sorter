@@ -31,24 +31,71 @@ def organize_by_broad_genre(song_data, broad_genres):
     return genre_playlists
 
 
-def create_playlists(sp, genre_playlists):
+def create_playlists(sp, genre_playlists, language_playlists=None):
     """
-    Create playlists and add songs based on broad genres.
+    Create playlists and add songs based on broad genres and languages.
+    Avoids creating duplicate playlists.
     """
     user_id = sp.current_user()["id"]
 
+    # Create playlists for broad genres
     for broad_genre, uris in genre_playlists.items():
-        # Create a new playlist for the broad genre
-        playlist = sp.user_playlist_create(
-            user=user_id, name=f"{broad_genre} Playlist", public=True
-        )
-        playlist_id = playlist["id"]
+        if broad_genre == "Other" and language_playlists:
+            continue  # Skip "Other" playlist if language playlists are created
 
-        # Add songs in batches of 100 (Spotify API limit)
+        # Check if the playlist already exists
+        playlists = sp.current_user_playlists()
+        playlist_exists = False
+        for playlist in playlists["items"]:
+            if playlist["name"] == f"{broad_genre} Playlist":
+                playlist_id = playlist["id"]
+                playlist_exists = True
+                break
+
+        if not playlist_exists:
+            # Create a new playlist
+            playlist = sp.user_playlist_create(
+                user=user_id, name=f"{broad_genre} Playlist", public=True
+            )
+            playlist_id = playlist["id"]
+            print(f"Created '{broad_genre} Playlist'.")
+        else:
+            print(f"'{broad_genre} Playlist' already exists. Adding songs to it.")
+
+        # Add songs in batches of 100
         batch_size = 100
         for i in range(0, len(uris), batch_size):
             batch = uris[i : i + batch_size]
             sp.playlist_add_items(playlist_id, batch)
-            print(f"Added {len(batch)} songs to '{broad_genre}' playlist.")
+            print(f"Added {len(batch)} songs to '{broad_genre} Playlist'.")
 
-    print("All playlists created successfully!")
+    # Create playlists for languages (if provided)
+    if language_playlists:
+        for language, uris in language_playlists.items():
+            # Check if the playlist already exists
+            playlists = sp.current_user_playlists()
+            playlist_exists = False
+            for playlist in playlists["items"]:
+                if playlist["name"] == f"{language} Playlist":
+                    playlist_id = playlist["id"]
+                    playlist_exists = True
+                    break
+
+            if not playlist_exists:
+                # Create a new playlist
+                playlist = sp.user_playlist_create(
+                    user=user_id, name=f"{language} Playlist", public=True
+                )
+                playlist_id = playlist["id"]
+                print(f"Created '{language} Playlist'.")
+            else:
+                print(f"'{language} Playlist' already exists. Adding songs to it.")
+
+            # Add songs in batches of 100
+            batch_size = 100
+            for i in range(0, len(uris), batch_size):
+                batch = uris[i : i + batch_size]
+                sp.playlist_add_items(playlist_id, batch)
+                print(f"Added {len(batch)} songs to '{language} Playlist'.")
+
+    print("All playlists created/updated successfully!")
