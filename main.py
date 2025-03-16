@@ -1,6 +1,10 @@
 from spotify_auth import authenticate_spotify
 from fetch_songs import fetch_liked_songs, fetch_song_metadata
-from organize_songs import organize_by_broad_genre, create_playlists
+from organize_songs import (
+    organize_by_broad_genre,
+    organize_other_playlist_by_language,
+    create_playlists,
+)
 from utils import setup_logging
 import json
 
@@ -22,11 +26,21 @@ def main():
     with open("broad_genres.json", "r") as f:
         broad_genres = json.load(f)
 
+    # Load language mapping from JSON file
+    with open("language_mapping.json", "r") as f:
+        language_mapping = json.load(f)
+
     # Organize songs by broad genre
     genre_playlists = organize_by_broad_genre(song_data, broad_genres)
 
+    # Organize "Other" playlist by language
+    other_songs = genre_playlists.get("Other", [])
+    language_playlists = organize_other_playlist_by_language(
+        sp, song_data, other_songs, language_mapping
+    )
+
     # Create playlists
-    create_playlists(sp, genre_playlists)
+    create_playlists(sp, genre_playlists, language_playlists)
 
 
 if __name__ == "__main__":
