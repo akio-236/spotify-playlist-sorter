@@ -1,6 +1,6 @@
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
-from config import CLIENT_ID, CLIENT_SECRET, REDIRECT_URI, SCOPE
+from backend.config import CLIENT_ID, CLIENT_SECRET, REDIRECT_URI, SCOPE
 
 
 def authenticate_spotify():

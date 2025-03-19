@@ -1,7 +1,7 @@
 import json
 from collections import defaultdict
-from spotify_auth import authenticate_spotify
-from fetch_songs import fetch_liked_songs, fetch_song_metadata
+from backend.spotify_auth import authenticate_spotify
+from backend.fetch_songs import fetch_liked_songs, fetch_song_metadata
 
 
 def analyze_other_playlist(sp, song_data, broad_genres):

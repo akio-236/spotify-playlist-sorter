@@ -1,6 +1,6 @@
 import json
 from collections import defaultdict
-from spotify_auth import authenticate_spotify
+from backend.spotify_auth import authenticate_spotify
 
 
 def organize_by_broad_genre(song_data, broad_genres):

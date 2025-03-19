@@ -1,11 +1,11 @@
-from spotify_auth import authenticate_spotify
-from fetch_songs import fetch_liked_songs, fetch_song_metadata
-from organize_songs import (
+from backend.spotify_auth import authenticate_spotify
+from backend.fetch_songs import fetch_liked_songs, fetch_song_metadata
+from backend.organize_songs import (
     organize_by_broad_genre,
     organize_other_playlist_by_language,
     create_playlists,
 )
-from utils import setup_logging
+from backend.utils import setup_logging
 import json
 
 

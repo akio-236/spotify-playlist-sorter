@@ -1,7 +1,7 @@
 import json
 import time
-from spotify_auth import authenticate_spotify
-from fetch_songs import fetch_liked_songs
+from backend.spotify_auth import authenticate_spotify
+from backend.fetch_songs import fetch_liked_songs
 
 
 def fetch_song_genres(sp, liked_songs):

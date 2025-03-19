@@ -1,6 +1,6 @@
 import logging
-from spotify_auth import authenticate_spotify
-from config import CLIENT_ID, CLIENT_SECRET, REDIRECT_URI
+from backend.spotify_auth import authenticate_spotify
+from backend.config import CLIENT_ID, CLIENT_SECRET, REDIRECT_URI
 
 # Set up logging
 logging.basicConfig(

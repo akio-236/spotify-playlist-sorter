@@ -1,4 +1,4 @@
-from spotify_auth import authenticate_spotify
+from backend.spotify_auth import authenticate_spotify
 
 
 def fetch_liked_songs(sp):
