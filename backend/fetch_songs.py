@@ -1,11 +1,8 @@
-from backend.spotify_auth import authenticate_spotify
-
-
 def fetch_liked_songs(sp):
     """Fetch all liked songs from Spotify."""
     liked_songs = []
     offset = 0
-    limit = 50  # Max number of songs per request
+    limit = 50
 
     while True:
         results = sp.current_user_saved_tracks(limit=limit, offset=offset)
@@ -14,7 +11,6 @@ def fetch_liked_songs(sp):
             break
         offset += limit
 
-    print(f"Fetched {len(liked_songs)} liked songs.")
     return liked_songs
 
 
@@ -37,5 +33,4 @@ def fetch_song_metadata(sp, liked_songs):
             }
         )
 
-    print("Fetched metadata for all songs.")
     return song_data
