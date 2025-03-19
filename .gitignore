@@ -1,0 +1,7 @@
+# Ignore config.py
+config.py
+
+# Ignore environment-specific files
+.env
+venv/
+__pycache__/
