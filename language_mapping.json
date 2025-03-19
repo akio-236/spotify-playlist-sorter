@@ -1,0 +1,38 @@
+{
+    "Hindi": [
+        "bollywood",
+        "hindi pop",
+        "hindi hip hop",
+        "desi pop"
+    ],
+    "Tamil": [
+        "kollywood",
+        "tamil pop",
+        "tamil hip hop"
+    ],
+    "Spanish": [
+        "reggaeton",
+        "latin",
+        "spanish-language reggae"
+    ],
+    "Korean": [
+        "k-pop",
+        "k-rap",
+        "k-ballad"
+    ],
+    "Japanese": [
+        "j-pop",
+        "j-rock",
+        "j-rap"
+    ],
+    "Chinese": [
+        "c-pop",
+        "mandopop",
+        "chinese r&b"
+    ],
+    "French": [
+        "french jazz",
+        "vari\u00e9t\u00e9 fran\u00e7aise"
+    ],
+    "Other Languages": []
+}
