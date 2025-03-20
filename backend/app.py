@@ -2,7 +2,7 @@ from flask import Flask, render_template, redirect, request, session, jsonify
 import spotipy
 from spotify_auth import authenticate_spotify
 from fetch_songs import fetch_liked_songs, fetch_song_metadata
-from organize_songs import broad_genres, create_playlists
+from organize_songs import organize_by_broad_genre, create_playlists
 import os
 
 app = Flask(__name__)
@@ -42,7 +42,7 @@ def organize():
     # Fetch and organize songs
     liked_songs = fetch_liked_songs(sp)
     song_data = fetch_song_metadata(sp, liked_songs)
-    genre_playlists = broad_genres(song_data, broad_genres)
+    genre_playlists = organize_by_broad_genre(song_data, organize_by_broad_genre)
     create_playlists(sp, genre_playlists)
 
     return "Playlists created successfully!"
