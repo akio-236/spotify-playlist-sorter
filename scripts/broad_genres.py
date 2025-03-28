@@ -1,4 +1,8 @@
 import json
+import os
+
+# Create data directory if it doesn't exist
+os.makedirs("data", exist_ok=True)
 
 # Genre mapping (updated to include more genres)
 genre_mapping = {
@@ -256,14 +260,12 @@ language_mapping = {
 
 
 def save_mappings_to_json():
-    """
-    Save genre and language mappings to JSON files.
-    """
-    with open("broad_genres.json", "w") as f:
+    """Save genre and language mappings to JSON files in data folder."""
+    with open("data/broad_genres.json", "w") as f:
         json.dump(genre_mapping, f, indent=4)
-    with open("language_mapping.json", "w") as f:
+    with open("data/language_mapping.json", "w") as f:
         json.dump(language_mapping, f, indent=4)
-    print("Genre and language mappings saved to JSON files.")
+    print("Genre and language mappings saved to data folder.")
 
 
 if __name__ == "__main__":

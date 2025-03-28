@@ -1,35 +1,36 @@
 import json
+import os
 from collections import defaultdict
 from spotify_auth import authenticate_spotify
 
 
+def load_data_from_json():
+    """Load all data from JSON files in data folder."""
+    with open("data/broad_genres.json") as f:
+        broad_genres = json.load(f)
+    with open("data/song_data.json") as f:
+        song_data = json.load(f)
+    with open("data/language_data.json") as f:
+        language_data = json.load(f)
+    return broad_genres, song_data, language_data
+
+
 def organize_by_broad_genre(song_data, broad_genres):
-    """Organize songs into broad genre playlists"""
+    """Organize songs into broad genre playlists."""
     genre_playlists = defaultdict(set)
 
     for song in song_data:
         for genre in song["genres"]:
-            # Find the broad genre for the current subgenre
-            broad_genre = None
             for bg, subgenres in broad_genres.items():
                 if genre.lower() in [sg.lower() for sg in subgenres]:
-                    broad_genre = bg
+                    genre_playlists[bg].add(song["uri"])
                     break
-
-            if broad_genre:
-                genre_playlists[broad_genre].add(song["uri"])
 
     return {k: list(v) for k, v in genre_playlists.items()}
 
 
-def load_language_data():
-    """Load pre-detected language data"""
-    with open("language_data.json") as f:
-        return json.load(f)
-
-
 def get_existing_playlist_tracks(sp, playlist_id):
-    """Get existing tracks in a playlist"""
+    """Get existing tracks in a playlist."""
     tracks = set()
     offset = 0
     limit = 100
@@ -46,7 +47,7 @@ def get_existing_playlist_tracks(sp, playlist_id):
 
 
 def create_playlists(sp, genre_playlists, language_data):
-    """Create all playlists (genres + languages)"""
+    """Create all playlists (genres + languages)."""
     user_id = sp.current_user()["id"]
 
     # Create genre playlists
@@ -106,17 +107,11 @@ def main():
     # Authenticate
     sp = authenticate_spotify()
 
-    # Load mappings
-    with open("broad_genres.json") as f:
-        broad_genres = json.load(f)
-
-    # Fetch song data
-    with open("unique_genres.json") as f:
-        song_data = json.load(f)
+    # Load data
+    broad_genres, song_data, language_data = load_data_from_json()
 
     # Organize data
     genre_playlists = organize_by_broad_genre(song_data, broad_genres)
-    language_data = load_language_data()
 
     # Create playlists
     create_playlists(sp, genre_playlists, language_data)
