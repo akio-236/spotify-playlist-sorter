@@ -1,116 +1,95 @@
 import json
+from spotify_auth import authenticate_spotify
 from collections import defaultdict
-import spotipy
-from spotipy.oauth2 import SpotifyOAuth
-from config import CLIENT_ID, CLIENT_SECRET, REDIRECT_URI, SCOPE
-
-# Initialize Spotify client
-sp = spotipy.Spotify(
-    auth_manager=SpotifyOAuth(
-        client_id=CLIENT_ID,
-        client_secret=CLIENT_SECRET,
-        redirect_uri=REDIRECT_URI,
-        scope=SCOPE,
-    )
-)
-
-# Language mapping (customize this as needed)
-LANGUAGE_MAPPING = {
-    "Hindi": ["bollywood", "hindi", "desi", "indian pop"],
-    "Spanish": ["latin", "reggaeton", "spanish", "bachata"],
-    "Korean": ["k-pop", "korean"],
-    "Japanese": ["j-pop", "japanese", "anime"],
-    "English": ["pop", "rock", "hip hop", "r&b"],  # Default for common genres
-    "Other": [],  # Catch-all for unmapped languages
-}
 
 
-def fetch_all_liked_songs():
-    """Fetch all liked songs with metadata."""
-    print("Fetching liked songs...")
-    songs = []
+def fetch_liked_songs(sp):
+    """Fetch all liked songs from Spotify."""
+    liked_songs = []
     offset = 0
-    limit = 50  # Spotify's max per request
+    limit = 50  # Max number of songs per request
 
     while True:
-        batch = sp.current_user_saved_tracks(limit=limit, offset=offset)
-        for item in batch["items"]:
-            track = item["track"]
-            artist = sp.artist(track["artists"][0]["id"])  # Get artist details
-            songs.append(
-                {
-                    "name": track["name"],
-                    "artist": track["artists"][0]["name"],
-                    "genres": artist["genres"],
-                    "uri": track["uri"],
-                    "language": None,  # To be determined later
-                }
-            )
-
-        if len(batch["items"]) < limit:
+        results = sp.current_user_saved_tracks(limit=limit, offset=offset)
+        liked_songs.extend(results["items"])
+        if len(results["items"]) < limit:
             break
         offset += limit
 
-    print(f"Fetched {len(songs)} songs.")
-    return songs
+    print(f"Fetched {len(liked_songs)} liked songs.")
+    return liked_songs
 
 
-def detect_languages(songs):
-    """Detect language for each song based on genres."""
-    print("Detecting languages...")
-    language_data = defaultdict(int)
+def fetch_song_metadata(sp, liked_songs):
+    """Fetch metadata (genres, artist, etc.) for each song."""
+    song_data = []
+    all_genres = set()
+    language_counter = defaultdict(int)
 
-    for song in songs:
-        detected = False
-        for lang, keywords in LANGUAGE_MAPPING.items():
-            if any(keyword in " ".join(song["genres"]).lower() for keyword in keywords):
-                song["language"] = lang
-                language_data[lang] += 1
-                detected = True
-                break
+    for item in liked_songs:
+        track = item["track"]
+        artist_id = track["artists"][0]["id"]
+        artist_info = sp.artist(artist_id)
+        genres = artist_info["genres"]
 
-        if not detected:
-            song["language"] = "Other"
-            language_data["Other"] += 1
+        # Collect all unique genres
+        all_genres.update(genres)
 
-    return songs, dict(language_data)
+        song_data.append(
+            {
+                "name": track["name"],
+                "artist": track["artists"][0]["name"],
+                "genres": genres,
+                "uri": track["uri"],
+            }
+        )
 
-
-def extract_unique_genres(songs):
-    """Extract all unique genres from songs."""
-    print("Extracting genres...")
-    genres = set()
-    for song in songs:
-        genres.update(song["genres"])
-    return sorted(genres)
+    print("Fetched metadata for all songs.")
+    return song_data, list(all_genres)
 
 
-def save_data(songs, language_data, genres):
-    """Save all data to JSON files."""
-    with open("liked_songs.json", "w") as f:
-        json.dump(songs, f, indent=2)
+def detect_languages(song_data, language_mapping):
+    """Detect languages from all songs (not just 'Other' playlist)"""
+    language_data = defaultdict(list)
 
-    with open("language_data.json", "w") as f:
-        json.dump(language_data, f, indent=2)
+    for song in song_data:
+        for genre in song["genres"]:
+            for lang, lang_genres in language_mapping.items():
+                if genre.lower() in [g.lower() for g in lang_genres]:
+                    language_data[lang].append(song["uri"])
+                    break
+            else:
+                language_data["Other Languages"].append(song["uri"])
 
+    return language_data
+
+
+def save_data_to_json(genres, language_data):
+    """Save all data to JSON files"""
     with open("unique_genres.json", "w") as f:
-        json.dump(genres, f, indent=2)
-
+        json.dump(genres, f, indent=4)
+    with open("language_data.json", "w") as f:
+        json.dump(language_data, f, indent=4)
     print("Data saved to JSON files.")
 
 
 def main():
-    # Step 1: Fetch all liked songs with metadata
-    songs = fetch_all_liked_songs()
+    # Authenticate with Spotify
+    sp = authenticate_spotify()
 
-    # Step 2: Detect languages
-    songs_with_language, language_data = detect_languages(songs)
+    # Load mappings
+    with open("language_mapping.json") as f:
+        language_mapping = json.load(f)
 
-    # Step 3: Extract unique genres
-    unique_genres = extract_unique_genres(songs)
+    # Fetch data
+    liked_songs = fetch_liked_songs(sp)
+    song_data, all_genres = fetch_song_metadata(sp, liked_songs)
+    language_data = detect_languages(song_data, language_mapping)
 
-    # Step 4: Save all data
-    save_data(songs_with_language, language_data, unique_genres)
+    # Save data
+    save_data_to_json(all_genres, language_data)
+
+    return song_data
 
 
 if __name__ == "__main__":
