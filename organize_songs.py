@@ -50,6 +50,14 @@ def create_playlists(sp, genre_playlists, language_data):
     """Create all playlists (genres + languages)."""
     user_id = sp.current_user()["id"]
 
+    # Function to add tracks in batches
+    def add_tracks_in_batches(playlist_id, uris, batch_size=100):
+        """Add tracks to playlist in batches to avoid API limits."""
+        for i in range(0, len(uris), batch_size):
+            batch = uris[i : i + batch_size]
+            sp.playlist_add_items(playlist_id, batch)
+            print(f"Added batch of {len(batch)} songs to playlist.")
+
     # Create genre playlists
     for genre, uris in genre_playlists.items():
         # Check if playlist exists
@@ -73,8 +81,8 @@ def create_playlists(sp, genre_playlists, language_data):
         new_uris = [uri for uri in uris if uri not in existing_tracks]
 
         if new_uris:
-            sp.playlist_add_items(playlist_id, new_uris)
-            print(f"Added {len(new_uris)} songs to '{genre} Playlist'.")
+            add_tracks_in_batches(playlist_id, new_uris)
+            print(f"Added total of {len(new_uris)} songs to '{genre} Playlist'.")
 
     # Create language playlists
     for language, uris in language_data.items():
@@ -99,8 +107,8 @@ def create_playlists(sp, genre_playlists, language_data):
         new_uris = [uri for uri in uris if uri not in existing_tracks]
 
         if new_uris:
-            sp.playlist_add_items(playlist_id, new_uris)
-            print(f"Added {len(new_uris)} songs to '{language} Playlist'.")
+            add_tracks_in_batches(playlist_id, new_uris)
+            print(f"Added total of {len(new_uris)} songs to '{language} Playlist'.")
 
 
 def main():
