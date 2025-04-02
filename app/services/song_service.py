@@ -7,6 +7,9 @@ from spotipy.exceptions import SpotifyException
 
 logger = logging.getLogger("spotify_playlist_sorter")
 
+DATA_DIR = "data"
+CACHE_FILE = os.path.join(DATA_DIR, "artist_cache.json")
+
 
 class SongService:
     def __init__(self, spotify_client, data_dir: str = "data"):
@@ -41,47 +44,66 @@ class SongService:
         logger.info(f"Fetched {len(liked_songs)} liked songs in total.")
         return {"items": liked_songs}
 
-    from spotipy.exceptions import SpotifyException
+    def load_artist_cache() -> Dict:
+        """Load artist cache from file."""
+        try:
+            if os.path.exists(CACHE_FILE):
+                with open(CACHE_FILE, "r") as f:
+                    return json.load(f)
+        except Exception as e:
+            logger.error(f"Error loading artist cache: {e}")
+        return {}
 
+    def save_artist_cache(cache: Dict):
+        """Save artist cache to file."""
+        try:
+            with open(CACHE_FILE, "w") as f:
+                json.dump(cache, f)
+        except Exception as e:
+            logger.error(f"Error saving artist cache: {e}")
 
-def group_songs_by_genre(self, liked_songs: Dict) -> Dict[str, List[str]]:
-    """Group songs by genre."""
-    genre_map = {}
-    for item in liked_songs["items"]:
-        track = item["track"]
-        artist_id = track["artists"][0]["id"]  # Get the first artist's ID
+    def group_songs_by_genre(self, liked_songs: Dict) -> Dict[str, List[str]]:
+        """Group songs by genre."""
+        genre_map = {}
+        artist_ids = [
+            item["track"]["artists"][0]["id"] for item in liked_songs["items"]
+        ]  # Extract all artist IDs
 
-        retries = 3  # Maximum number of retries
-        while retries > 0:
-            try:
-                artist_info = self.sp.artist(artist_id)  # Fetch artist info
-                genres = artist_info.get("genres", [])
-                for genre in genres:
-                    if genre not in genre_map:
-                        genre_map[genre] = []
-                    genre_map[genre].append(track["uri"])
-                break  # Exit retry loop if successful
-            except SpotifyException as e:
-                if e.http_status == 429:  # Rate limit exceeded
-                    retry_after = int(
-                        e.headers.get("Retry-After", 1)
-                    )  # Default to 1 second
-                    logger.warning(
-                        f"Rate limit exceeded. Retrying after {retry_after} seconds..."
-                    )
-                    time.sleep(retry_after)
-                    retries -= 1
-                else:
-                    logger.error(
-                        f"Error fetching artist info for track '{track['name']}': {e}"
-                    )
-                    break
+        # Fetch artist info in batches of 50
+        for i in range(0, len(artist_ids), 50):
+            batch = artist_ids[i : i + 50]
+            retries = 3  # Maximum number of retries
+            while retries > 0:
+                try:
+                    artist_infos = self.sp.artists(batch)[
+                        "artists"
+                    ]  # Fetch info for multiple artists
+                    for artist_info in artist_infos:
+                        genres = artist_info.get("genres", [])
+                        for genre in genres:
+                            if genre not in genre_map:
+                                genre_map[genre] = []
+                            genre_map[genre].append(artist_info["uri"])
+                    break  # Exit retry loop if successful
+                except SpotifyException as e:
+                    if e.http_status == 429:  # Rate limit exceeded
+                        retry_after = int(
+                            e.headers.get("Retry-After", 1)
+                        )  # Default to 1 second
+                        logger.warning(
+                            f"Rate limit exceeded. Retrying after {retry_after} seconds..."
+                        )
+                        time.sleep(retry_after)
+                        retries -= 1
+                    else:
+                        logger.error(f"Error fetching artist info: {e}")
+                        break
 
-        # Add a delay to avoid rate limiting
-        time.sleep(0.1)
+            # Add a delay to avoid rate limiting
+            time.sleep(1)
 
-    logger.info(f"Grouped songs into {len(genre_map)} genres.")
-    return genre_map
+        logger.info(f"Grouped songs into {len(genre_map)} genres.")
+        return genre_map
 
     def group_songs_by_language(self, liked_songs: Dict) -> Dict[str, List[str]]:
         """Group songs by language (placeholder implementation)."""
