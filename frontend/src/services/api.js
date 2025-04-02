@@ -1,5 +1,7 @@
 // Base API configuration for communicating with backend
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api';
+const API_BASE_URL = import.meta.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api';
+
+console.log('API Base URL:', import.meta.env.VITE_API_BASE_URL);
 
 // Get the current access token from localStorage
 const getAccessToken = () => localStorage.getItem('spotify_access_token');
