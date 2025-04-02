@@ -1,18 +1,46 @@
-# Ignore config.py
-config.py
-
-# Ignore environment-specific files
-.env
-venv/
-__pycache__/
-
-# JSON data files
-unique_genres.json
-language_data.json
-
-# Logs
-*.log
-
-# Python cache
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
+*$py.class
+
+# Environment variables
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Logs
+logs/
+*.log
+
+# Cache files
+.cache
+.pytest_cache/
+
+# VS Code 
+.vscode/
+
+# PyCharm
+.idea/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Data files
+data/song_data.json
+data/unique_genres.json
+data/genre_playlists.json
+data/language_data.json
+
+# Config file with secrets
+config.py
+
+# System files
+.DS_Store
+Thumbs.db
