@@ -1,9 +1,7 @@
 import json
 import os
-from tenacity import retry, stop_after_attempt, wait_fixed
+from typing import List, Dict, Any
 import logging
-from typing import List, Dict, Any, Set, Tuple
-import os
 
 logger = logging.getLogger("spotify_playlist_sorter")
 
@@ -16,7 +14,7 @@ class SongService:
         # Ensure data directory exists
         os.makedirs(data_dir, exist_ok=True)
 
-    def fetch_liked_songs(self):
+    def fetch_liked_songs(self) -> Dict:
         """Fetch all liked songs from Spotify."""
         liked_songs = []
         offset = 0
@@ -40,56 +38,29 @@ class SongService:
                 break
 
         logger.info(f"Fetched {len(liked_songs)} liked songs in total.")
-        return liked_songs
+        return {"items": liked_songs}
 
-    @retry(stop=stop_after_attempt(5), wait=wait_fixed(2))
-    def fetch_artist_info(self, artist_id: str):
-        """Fetch artist info with retry logic."""
-        return self.sp.artist(artist_id)
+    def group_songs_by_genre(self, liked_songs: Dict) -> Dict[str, List[str]]:
+        """Group songs by genre."""
+        genre_map = {}
+        for item in liked_songs["items"]:
+            track = item["track"]
+            genres = track.get("album", {}).get("genres", [])
+            for genre in genres:
+                if genre not in genre_map:
+                    genre_map[genre] = []
+                genre_map[genre].append(track["uri"])
+        return genre_map
 
-    def fetch_song_metadata(
-        self, liked_songs: List[Dict[str, Any]]
-    ) -> Tuple[List[Dict[str, Any]], List[str]]:
-        """Fetch metadata (genres, artist, etc.) for each song."""
-        song_data = []
-        all_genres = set()
-
-        logger.info("Fetching metadata for songs...")
-
-        # Process songs in batches of 50 to avoid overwhelming the API
-        for i in range(0, len(liked_songs), 50):
-            batch = liked_songs[i : i + 50]
-            for item in batch:
-                track = item["track"]
-                artist_id = track["artists"][0]["id"]
-
-                try:
-                    artist_info = self.fetch_artist_info(artist_id)
-                    genres = artist_info.get("genres", [])
-                    all_genres.update(genres)
-
-                    song_data.append(
-                        {
-                            "name": track["name"],
-                            "artist": track["artists"][0]["name"],
-                            "genres": genres,
-                            "uri": track["uri"],
-                            "album": track["album"]["name"],
-                            "album_image": track["album"]["images"][0]["url"]
-                            if track["album"]["images"]
-                            else None,
-                        }
-                    )
-                except Exception as e:
-                    logger.error(
-                        f"Error fetching metadata for song '{track['name']}': {e}"
-                    )
-
-        logger.info("Fetched metadata for all songs.")
-        return song_data, list(all_genres)
+    def group_songs_by_language(self, liked_songs: Dict) -> Dict[str, List[str]]:
+        """Group songs by language (placeholder implementation)."""
+        # Placeholder: Implement logic to group songs by language
+        # For now, return an empty dictionary
+        logger.warning("Language grouping is not implemented yet.")
+        return {}
 
     def save_song_data(self, song_data: List[Dict[str, Any]], all_genres: List[str]):
-        """Save song data to JSON files"""
+        """Save song data to JSON files."""
         try:
             with open(os.path.join(self.data_dir, "song_data.json"), "w") as f:
                 json.dump(song_data, f, indent=4)
@@ -103,7 +74,7 @@ class SongService:
             raise
 
     def load_song_data(self):
-        """Load song data from JSON files"""
+        """Load song data from JSON files."""
         try:
             with open(os.path.join(self.data_dir, "song_data.json"), "r") as f:
                 song_data = json.load(f)

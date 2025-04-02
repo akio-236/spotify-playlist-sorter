@@ -94,7 +94,9 @@ class PlaylistService:
 
         return playlist_id
 
-    def create_genre_playlists(self, genre_playlists: Dict[str, List[str]]):
+    def create_genre_playlists(
+        self, genre_playlists: Dict[str, List[str]]
+    ) -> Dict[str, Dict]:
         """Create playlists for each genre."""
         created_playlists = {}
 
@@ -118,11 +120,13 @@ class PlaylistService:
 
         return created_playlists
 
-    def create_language_playlists(self, language_data: Dict[str, List[str]]):
+    def create_language_playlists(
+        self, language_playlists: Dict[str, List[str]]
+    ) -> Dict[str, Dict]:
         """Create playlists for each language."""
         created_playlists = {}
 
-        for language, uris in language_data.items():
+        for language, uris in language_playlists.items():
             if not uris:  # Skip empty playlists
                 continue
 
