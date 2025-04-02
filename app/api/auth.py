@@ -4,9 +4,12 @@ from pydantic import BaseModel
 from typing import Optional
 import json
 import os
-from app.services.auth_service import create_spotify_oauth, get_spotify_client
+from app.services.auth_service import SpotifyAuthService
 
 router = APIRouter()
+
+# Instantiate the SpotifyAuthService
+auth_service = SpotifyAuthService()
 
 
 class AuthResponse(BaseModel):
@@ -22,8 +25,7 @@ async def login():
     """
     Initiate the Spotify OAuth login flow
     """
-    sp_oauth = create_spotify_oauth()
-    auth_url = sp_oauth.get_authorize_url()
+    auth_url = auth_service.get_auth_url()
     return {"auth_url": auth_url}
 
 
@@ -32,17 +34,16 @@ async def callback(code: str, state: Optional[str] = None):
     """
     Handle the callback from Spotify OAuth
     """
-    sp_oauth = create_spotify_oauth()
-
     try:
+        sp_oauth = auth_service.get_auth_manager()
         token_info = sp_oauth.get_access_token(code)
 
         # Save token info to cache file for future use
-        os.makedirs(".cache", exist_ok=True)
         with open(".cache", "w") as f:
             json.dump(token_info, f)
 
-        return token_info
+        return {"message": "Authentication successful", "token_info": token_info}
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -56,7 +57,7 @@ async def get_current_user():
     Get information about the current authenticated user
     """
     try:
-        sp = get_spotify_client()
+        sp = auth_service.get_spotify_client()
         if not sp:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated"

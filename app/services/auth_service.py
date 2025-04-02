@@ -1,3 +1,4 @@
+import os
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from fastapi import HTTPException, Request
@@ -13,12 +14,17 @@ class SpotifyAuthService:
 
     def get_auth_manager(self):
         """Get Spotify OAuth authentication manager"""
+        # Remove existing cache file if it exists
+        cache_path = ".cache"
+        if os.path.exists(cache_path):
+            os.remove(cache_path)
         return SpotifyOAuth(
             client_id=self.settings.SPOTIFY_CLIENT_ID,
             client_secret=self.settings.SPOTIFY_CLIENT_SECRET,
             redirect_uri=self.settings.SPOTIFY_REDIRECT_URI,
             scope=self.settings.SPOTIFY_SCOPE,
             cache_path=".cache",
+            open_browser=True,  # Optional: Opens browser for authentication
         )
 
     def get_auth_url(self):
