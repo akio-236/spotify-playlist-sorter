@@ -2,7 +2,7 @@ import os
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from fastapi import HTTPException, Request
-from app.core.config import get_settings
+from backend.core.config import get_settings
 import logging
 
 logger = logging.getLogger("spotify_playlist_sorter")

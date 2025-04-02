@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends, status
 from typing import List, Dict, Optional
-from app.services.auth_service import SpotifyAuthService
-from app.services.playlist_service import PlaylistService
-from app.services.song_service import SongService
+from backend.services.auth_service import SpotifyAuthService
+from backend.services.playlist_service import PlaylistService
+from backend.services.song_service import SongService
 
 router = APIRouter()
 

@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends, status
 from typing import List, Dict, Optional
 from pydantic import BaseModel
-from app.services.auth_service import SpotifyAuthService  # Import the auth service
-from app.services.song_service import SongService  # Import the song service
+from backend.services.auth_service import SpotifyAuthService  # Import the auth service
+from backend.services.song_service import SongService  # Import the song service
 
 router = APIRouter()
 

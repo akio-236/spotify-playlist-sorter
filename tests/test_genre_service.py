@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import patch, mock_open, MagicMock
 import json
 import os
-from app.services.genre_service import GenreService
+from backend.services.genre_service import GenreService
 
 
 class TestGenreService(unittest.TestCase):

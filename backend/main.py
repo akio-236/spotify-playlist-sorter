@@ -4,9 +4,9 @@ from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
-from app.core.config import settings
-from app.core.logging import setup_logging
-from app.api import auth, playlists, songs
+from backend.core.config import settings
+from backend.core.logging import setup_logging
+from backend.api import auth, playlists, songs
 
 # Set up logging
 setup_logging()

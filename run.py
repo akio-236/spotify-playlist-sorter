@@ -1,6 +1,6 @@
 import uvicorn
 import os
-from app.core.config import settings
+from backend.core.config import settings
 
 if __name__ == "__main__":
     # Create data directory if it doesn't exist

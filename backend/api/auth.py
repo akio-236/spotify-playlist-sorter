@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from typing import Optional
 import json
 import os
-from app.services.auth_service import SpotifyAuthService
+from backend.services.auth_service import SpotifyAuthService
 
 router = APIRouter()
 

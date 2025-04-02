@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from app.services.playlist_service import PlaylistService
+from backend.services.playlist_service import PlaylistService
 
 
 class TestPlaylistService(unittest.TestCase):

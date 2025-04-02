@@ -4,8 +4,8 @@ import os
 import json
 from fastapi.testclient import TestClient
 
-from app.main import app
-from app.services.auth_service import SpotifyAuthService
+from backend.main import app
+from backend.services.auth_service import SpotifyAuthService
 
 
 class TestAuth(unittest.TestCase):
