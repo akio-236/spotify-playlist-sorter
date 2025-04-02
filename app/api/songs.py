@@ -52,7 +52,8 @@ async def fetch_liked_songs(
     """
     try:
         # Fetch liked songs using the SongService instance
-        liked_songs = song_service.fetch_liked_songs()
+        liked_songs = song_service.fetch_liked_songs(limit=limit, offset=offset)
+
         return [
             SongItem(
                 id=song["track"]["id"],
@@ -66,7 +67,7 @@ async def fetch_liked_songs(
                 else None,
                 preview_url=song["track"].get("preview_url"),
             )
-            for song in liked_songs[offset : offset + limit]
+            for song in liked_songs["items"]
         ]
 
     except Exception as e:
